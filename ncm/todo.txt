@@ -1,0 +1,14 @@
+TODO:
+- NCM itself can be used to implement arbitrary base literals. i.e. #2:100111 for binary, while #0:deadbeef wouls be a shorthand for hexadecimals
+- `#?namespace NSName {...}` directive, which groups macro definitions inside a
+  namespace. They will be accessible through NSName::macroname
+  or with #?use NSName
+- `#.name` macros, which would trigger only when name is preceeded by `.`
+  these would useful to implement macros acting on methods.
+- User should be able to specify which chars form symbol and which are operators.
+- User should be able to define which chars begin comment.
+- User should be able to macro body chars, instead of default `{}`
+- #\(CONTENT) as a way to avoid macro-process the result.
+- A way to pre-expand parts of macro body during the definition.
+- Expanding macros inside #[...]
+- Add #fi as an optinal shorthand for #endif
