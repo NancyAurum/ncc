@@ -1,0 +1,56 @@
+- Calling method on a type segfaults compiler.
+- Calling local methods without this->
+- refactor patch to use common operations, like INJECT and ERASE, where possible.
+- a way to strip unused items from the generated files, so that older compilers could handle the output.
+- a way to autogenerate string names for enum values.
+- In f(g()), when g() returns a locally constructed object, f() wont dtor it,
+  resulting in a leak. One way to fix it, is introducing temporary object o,
+  at the start of current scope.
+  then doing f(o=g()). That way o will be freed on scope-exit.
+- While the sink redirection-style OOP solves the child using parent's methods, it doesn't solve the parent providing abstract API methods to work with its subclasses. Generally such API is a bad idea. We have to implement interface classes instead. These are just lists of methods
+  virtual {
+    int foo(int a, int b);
+    int bar(int c);
+  }
+  when a method or a function working with the virtual class is called,
+  instead of that object, a structure with that object reference and a list of methods is passed. Calling methods on it would redirect to method fields.
+- Thread local variables. We will have to somehow assemble information from all the obj files to create a single global TLS struct. Maybe referenced in the filename.field_name way.
+- maintaining metadata to expose all the internals to another language (in my case Symta). 
+- Unlimited "." levels.
+- Have type inference for months[i] and i+1 work properly. Address arithmetics should too work.
+- a way to assigned values to a class location of different type. Would require a set of stor_<classname> functions
+- ncc should add <nc.h> by default, unless no_nc_h is specified
+- C++ like for `for(auto a:c) {`
+- ({}) blocks can be implemented using an external function, which gets & pointers to the free variables. Requires first implementing `&`
+- Lambdas can be implemented just like blocks, but needs to somehow get a pointer to invironment struct. Therefore lambdas should be explicitly defined as a struct {void *ptr_to_function; void *ptr_to_env;}
+- Auto-prefixing with namespace.
+- Allow embedding function header and function tail for each function matching some regex. That would allow to easily create stack traces or alternative GC implementations.
+- Fix issue with "lst_t topo; topo.ctor;" Watch for pg_assign/pg_mcalls
+- $ as a shorthand for `this->` access. i.e. $var. Implement it at the lexer level
+- @ for auto vars
+- object.member should access the struct member, if no method is defined. 
+- Inheritance can be implemented by passing all undefined method calls to the parent object.
+- $"" strings which can have `[]` inside, allowing to interpolate arguments. Would require dispatch on type to print value of any type. All returned string pointers should be freed after creating final string.
+- When function has not type, it should be infered from the first return inside its body. Then the patch should be created.
+- When the function arguments have to no type, their types should be infered from calls. And the pathe should be created.
+- Maintain proper symbol table for C parsing: when a symbol gets declared at current level, it either being cons-ed onto the existing definition, or added as a new. Needs separate symbol struct (allocated from an lst pool), which should also have additional pointer to be places arranged in the list of all symbols in this level.
+- Each time list grows, it should set a dirty flag, so that user code can optimize it back to truly_used*1.5.
+- blocks:
+  typedef void (^pblock)();
+  pblock p = ^ { printf("hello world\n"); };
+  p();
+- better error reporting in newer Bison: https://www.gnu.org/software/bison/manual/html_node/Syntax-Error-Reporting-Function.html
+- ref counting gc for classes declared with auto:
+  - Such classes must define two methods: rinc and rdec
+  - rinc called each time such object is assigned to a variable or returned.
+  - rdec called each time such object's place is being assigned to or when it exits scope.
+- `class !name;` defines an external type
+- when type is not a pointer, we should check against its method table, if one of them redefines access to a field.
+- `class *name {...}` would define a class passed by value, instead of `this` pointer.
+- `class name;` = `typedef struct name name;`
+- all top level objects should be static, unless explicitly declared "public"
+- Heartbeat heap memory management:
+  - User creates a scoped pool.
+  - Each allocation happens on this pool.
+  - The pool objects has heartbeat function, which garbage collects all objects not accessed during the last cycle.
+  - These objects are referenced through special structs
